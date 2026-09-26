@@ -20,7 +20,7 @@ export function OperationDetailView({ type, id }: { type: OperationType; id: str
   const isOpen = !["Done","Canceled"].includes(operation.status);
   const statusFlow = type === "adjustment" ? ["Draft","Done"] : ["Draft","Waiting","Ready","Done"];
   return <>
-    <PageHeading eyebrow={operationLabel(type)} title={operation.reference} description={`${operation.contact} · Created ${formatDate(operation.createdAt)}`} action={<div className="flex flex-wrap items-center gap-2"><StatusBadge status={operation.status} /><Link className={secondaryButton} href={`/operations/${segments[type]}`}>Back to list</Link></div>} />
+    <PageHeading eyebrow={operationLabel(type)} title={operation.reference} description={`${operation.contact} · Created ${formatDate(operation.createdAt)}`} action={<div className="flex flex-wrap items-center gap-2"><StatusBadge status={operation.status} className="min-h-10 px-3" /><Link className={secondaryButton} href={`/operations/${segments[type]}`}>Back to list</Link></div>} />
     <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-border pb-5">
       {isOpen && type !== "adjustment" && ["Draft","Waiting"].includes(operation.status) && <button className={primaryButton} type="button" onClick={() => run(() => markReady(id))}>Mark ready</button>}
       {isOpen && type === "delivery" && operation.status === "Ready" && !operation.packed && <button className={primaryButton} type="button" onClick={() => run(() => markPacked(id))}>Confirm picked & packed</button>}

@@ -1,10 +1,12 @@
 import type { ReactNode, SVGProps } from "react";
 
-export type IconName = "dashboard" | "products" | "receipt" | "delivery" | "transfer" | "adjustment" | "history" | "warehouse" | "location" | "settings" | "search" | "plus" | "menu" | "panel" | "close" | "arrow" | "chevron" | "check" | "filter" | "user" | "download" | "logout";
+export type IconName = "dashboard" | "products" | "category" | "report" | "receipt" | "delivery" | "transfer" | "adjustment" | "history" | "warehouse" | "location" | "settings" | "search" | "plus" | "menu" | "panel" | "close" | "arrow" | "chevron" | "check" | "filter" | "user" | "download" | "logout";
 
 const paths: Record<IconName, ReactNode> = {
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
   products: <><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Z" /><path d="m3 7 9 4 9-4M12 11v10" /></>,
+  category: <><path d="M3 5h11l7 7-9 9-9-9V5Z" /><circle cx="8" cy="9" r="1" /></>,
+  report: <><path d="M4 20h16M7 16v-5m5 5V5m5 11V9" /></>,
   receipt: <><path d="M12 3v12m-4-4 4 4 4-4" /><path d="M4 17v3h16v-3" /></>,
   delivery: <><path d="M12 16V4m-4 4 4-4 4 4" /><path d="M4 17v3h16v-3" /></>,
   transfer: <><path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4" /></>,

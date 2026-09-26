@@ -10,13 +10,13 @@ import { Icon } from "../ui/icon";
 import { SelectField } from "../ui/select-field";
 import { ProductForm } from "./product-form";
 
-export function ProductsView({ initialStockFilter = "all" }: { initialStockFilter?: "all" | "low" }) {
+export function ProductsView({ initialStockFilter = "all", initialCategory }: { initialStockFilter?: "all" | "low"; initialCategory?: string }) {
   const { state } = useDemo();
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(initialCategory ?? "all");
   const [stock, setStock] = useState(initialStockFilter);
   const [addOpen, setAddOpen] = useState(false);
-  const categories = [...new Set(state.products.map((item) => item.category))];
+  const categories = state.categories.map((item) => item.name);
   const products = useMemo(() => state.products.filter((product) => {
     const matchesSearch = `${product.name} ${product.sku}`.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category === "all" || product.category === category;

@@ -14,9 +14,9 @@ export function PageHeading({ eyebrow, title, description, action }: { eyebrow: 
   return <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="mb-1 font-mono text-[11px] font-medium uppercase tracking-[.12em] text-ink-muted">{eyebrow}</p><h1 className="m-0 font-sans text-2xl font-semibold tracking-tight text-foreground">{title}</h1><p className="mt-1.5 text-sm leading-6 text-ink-muted">{description}</p></div>{action}</header>;
 }
 
-export function StatusBadge({ status }: { status: OperationStatus | "Low" | "Out" }) {
+export function StatusBadge({ status, className = "" }: { status: OperationStatus | "Low" | "Out"; className?: string }) {
   const tone = { Draft: "bg-idle-wash text-idle-ink", Waiting: "bg-warn-wash text-warn-ink", Ready: "bg-info-wash text-info-ink", Done: "bg-ok-wash text-ok-ink", Canceled: "bg-bad-wash text-bad-ink", Low: "bg-warn-wash text-warn-ink", Out: "bg-bad-wash text-bad-ink" }[status];
-  return <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ${tone}`}><span className="h-1.5 w-1.5 rounded-full bg-current" />{status}</span>;
+  return <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ${tone} ${className}`}><span className="h-1.5 w-1.5 rounded-full bg-current" />{status}</span>;
 }
 
 export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {

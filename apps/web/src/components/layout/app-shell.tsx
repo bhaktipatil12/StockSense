@@ -11,7 +11,9 @@ interface NavItem { label: string; href: string; icon: IconName }
 const overview: NavItem[] = [
   { label: "Overview", href: "/dashboard", icon: "dashboard" },
   { label: "Products & stock", href: "/products", icon: "products" },
+  { label: "Categories", href: "/categories", icon: "category" },
   { label: "Move history", href: "/moves", icon: "history" },
+  { label: "Inventory valuation", href: "/reports", icon: "report" },
 ];
 const operations: NavItem[] = [
   { label: "Receipts", href: "/operations/receipts", icon: "receipt" },
