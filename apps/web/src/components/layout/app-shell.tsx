@@ -32,7 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
     return <Link key={item.href} href={item.href} title={item.label} className={`flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150 ${active ? "bg-brand-soft font-semibold text-brand-strong" : "text-ink hover:bg-brand-soft/70 hover:text-brand-strong"} ${collapsed ? "justify-center px-0" : ""}`} aria-current={active ? "page" : undefined} onClick={() => setMobileOpen(false)}><Icon name={item.icon} className="h-[15px] w-[15px] shrink-0" />{!collapsed && <span>{item.label}</span>}</Link>;
   }
-  return <div className="flex h-screen w-full gap-1 overflow-hidden bg-[#eaf0f6] p-1 font-sans text-foreground antialiased sm:gap-1.5 sm:p-1.5">
+  return <div className="flex h-dvh w-full gap-1 overflow-hidden bg-[#eaf0f6] p-1 font-sans text-foreground antialiased sm:gap-1.5 sm:p-1.5">
     {mobileOpen && <button className="fixed inset-0 z-40 bg-panel/30 md:hidden" type="button" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
     <aside className={`fixed inset-y-2 left-2 z-50 flex w-[min(17rem,calc(100vw-1rem))] shrink-0 flex-col rounded-lg border border-border bg-white py-3 shadow-sm transition-transform duration-200 md:relative md:inset-auto md:h-full md:translate-x-0 md:shadow-none md:transition-[width] ${mobileOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"} ${collapsed ? "md:w-14" : "md:w-[248px]"}`}>
       <div className={`flex items-center pb-3 ${collapsed ? "justify-center px-2" : "justify-between px-3"}`}>
