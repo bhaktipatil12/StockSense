@@ -9,6 +9,9 @@ interface DemoContextValue {
   state: DemoState;
   addProduct: (product: Omit<Product, "id">, opening?: { locationId: string; quantity: number }) => ActionResult;
   updateProduct: (id: string, product: Omit<Product, "id">) => ActionResult;
+  addCategory: (name: string, parentId?: string) => ActionResult;
+  updateCategory: (id: string, name: string, parentId?: string) => ActionResult;
+  deleteCategory: (id: string) => ActionResult;
   updateProfile: (name: string) => ActionResult;
   addWarehouse: (warehouse: Omit<Warehouse, "id">) => ActionResult;
   addLocation: (location: Omit<Location, "id">) => ActionResult;
@@ -34,7 +37,9 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         if (saved) {
           const parsed: unknown = JSON.parse(saved);
           if (parsed && typeof parsed === "object" && "products" in parsed && "warehouses" in parsed && "locations" in parsed && "operations" in parsed && "movements" in parsed && Array.isArray(parsed.products) && Array.isArray(parsed.warehouses) && Array.isArray(parsed.locations) && Array.isArray(parsed.operations) && Array.isArray(parsed.movements)) {
-            setState({ ...(parsed as DemoState), profileName: "profileName" in parsed && typeof parsed.profileName === "string" ? parsed.profileName : initialDemoState.profileName });
+            const restored = parsed as DemoState;
+            const categories = Array.isArray(restored.categories) ? restored.categories : [...initialDemoState.categories, ...[...new Set(restored.products.map((product) => product.category))].filter((name) => !initialDemoState.categories.some((category) => category.name === name)).map((name) => ({ id: crypto.randomUUID(), name }))];
+            setState({ ...restored, categories, profileName: "profileName" in parsed && typeof parsed.profileName === "string" ? parsed.profileName : initialDemoState.profileName });
           }
         }
       } catch (error) {
@@ -55,6 +60,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   function addProduct(product: Omit<Product, "id">, opening?: { locationId: string; quantity: number }): ActionResult {
     if (!product.name.trim() || !product.sku.trim()) return fail("Enter a product name and SKU.");
+    if (!state.categories.some((category) => category.name === product.category)) return fail("Choose a valid category.");
     if (!Number.isFinite(product.reorderPoint) || product.reorderPoint < 0 || (product.unitCost !== undefined && (!Number.isFinite(product.unitCost) || product.unitCost < 0))) return fail("Enter a valid reorder point and unit cost.");
     if (state.products.some((item) => item.sku.toLowerCase() === product.sku.trim().toLowerCase())) return fail("This SKU is already in use.");
     if (opening && (!state.locations.some((location) => location.id === opening.locationId) || !Number.isFinite(opening.quantity) || opening.quantity < 0)) return fail("Choose a valid opening location and quantity.");
@@ -74,11 +80,49 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     const existing = state.products.find((item) => item.id === id);
     if (!existing) return fail("Product not found.");
     if (!product.name.trim() || !product.sku.trim() || !product.category.trim()) return fail("Enter a product name, SKU, and category.");
+    if (!state.categories.some((category) => category.name === product.category)) return fail("Choose a valid category.");
     if (state.products.some((item) => item.id !== id && item.sku.toLowerCase() === product.sku.trim().toLowerCase())) return fail("This SKU is already in use.");
     if (!Number.isFinite(product.reorderPoint) || product.reorderPoint < 0 || (product.unitCost !== undefined && (!Number.isFinite(product.unitCost) || product.unitCost < 0))) return fail("Enter a valid reorder point and unit cost.");
     if (state.movements.some((movement) => movement.productId === id) && product.unit !== existing.unit) return fail("A product with stock history must keep its unit of measure.");
     setState((current) => ({ ...current, products: current.products.map((item) => item.id === id ? { ...product, id, name: product.name.trim(), sku: product.sku.trim().toUpperCase(), category: product.category.trim() } : item) }));
     return done("Product details updated.");
+  }
+
+  function addCategory(name: string, parentId?: string): ActionResult {
+    const clean = name.trim();
+    if (!clean) return fail("Enter a category name.");
+    if (state.categories.some((category) => category.name.toLowerCase() === clean.toLowerCase())) return fail("This category already exists.");
+    if (parentId && !state.categories.some((category) => category.id === parentId)) return fail("Choose a valid parent category.");
+    setState((current) => ({ ...current, categories: [...current.categories, { id: crypto.randomUUID(), name: clean, parentId }] }));
+    return done("Category added.");
+  }
+
+  function updateCategory(id: string, name: string, parentId?: string): ActionResult {
+    const existing = state.categories.find((category) => category.id === id);
+    const clean = name.trim();
+    if (!existing) return fail("Category not found.");
+    if (!clean) return fail("Enter a category name.");
+    if (state.categories.some((category) => category.id !== id && category.name.toLowerCase() === clean.toLowerCase())) return fail("This category already exists.");
+    if (parentId && !state.categories.some((category) => category.id === parentId)) return fail("Choose a valid parent category.");
+    let cursor = parentId;
+    const visited = new Set<string>();
+    while (cursor) {
+      if (cursor === id) return fail("A category cannot be its own parent.");
+      if (visited.has(cursor)) return fail("Category hierarchy is invalid.");
+      visited.add(cursor);
+      cursor = state.categories.find((category) => category.id === cursor)?.parentId;
+    }
+    setState((current) => ({ ...current, categories: current.categories.map((category) => category.id === id ? { ...category, name: clean, parentId } : category), products: current.products.map((product) => product.category === existing.name ? { ...product, category: clean } : product) }));
+    return done("Category updated across the catalog.");
+  }
+
+  function deleteCategory(id: string): ActionResult {
+    const category = state.categories.find((item) => item.id === id);
+    if (!category) return fail("Category not found.");
+    if (state.products.some((product) => product.category === category.name)) return fail("Move products to another category first.");
+    if (state.categories.some((item) => item.parentId === id)) return fail("Move subcategories first.");
+    setState((current) => ({ ...current, categories: current.categories.filter((item) => item.id !== id) }));
+    return done("Category removed.");
   }
 
   function updateProfile(name: string): ActionResult {
@@ -199,7 +243,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     return done(`${operation.reference} canceled.`);
   }
 
-  return <DemoContext.Provider value={{ state, addProduct, updateProduct, updateProfile, addWarehouse, addLocation, createOperation, markReady, markPacked, complete, cancel }}>{children}</DemoContext.Provider>;
+  return <DemoContext.Provider value={{ state, addProduct, updateProduct, addCategory, updateCategory, deleteCategory, updateProfile, addWarehouse, addLocation, createOperation, markReady, markPacked, complete, cancel }}>{children}</DemoContext.Provider>;
 }
 
 export function useDemo(): DemoContextValue {
