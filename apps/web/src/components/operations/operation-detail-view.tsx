@@ -5,13 +5,15 @@ import Link from "next/link";
 import { useDemo } from "../../context/demo-context";
 import { available, formatDate, formatQuantity, locationName, onHand, operationLabel, productName } from "../../lib/inventory";
 import type { ActionResult, OperationType } from "../../types/inventory";
-import { EmptyState, PageHeading, StatusBadge, primaryButton, secondaryButton, tableClass, tdClass, thClass } from "../ui/primitives";
+import { Drawer, EmptyState, PageHeading, StatusBadge, primaryButton, secondaryButton, tableClass, tdClass, thClass } from "../ui/primitives";
+import { OperationForm } from "./operation-form";
 
 const segments: Record<OperationType,string> = { receipt:"receipts", delivery:"deliveries", transfer:"transfers", adjustment:"adjustments" };
 
 export function OperationDetailView({ type, id }: { type: OperationType; id: string }) {
   const { state, markReady, markPacked, complete, cancel } = useDemo();
   const [feedback, setFeedback] = useState<ActionResult | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
   const operation = state.operations.find((item) => item.id === id && item.type === type);
   if (!operation) return <EmptyState title="Document not found" description="This operation could not be found." action={<Link className={secondaryButton} href={`/operations/${segments[type]}`}>Back to {segments[type]}</Link>} />;
   function run(action: () => ActionResult) { setFeedback(action()); }
@@ -22,12 +24,14 @@ export function OperationDetailView({ type, id }: { type: OperationType; id: str
   return <>
     <PageHeading eyebrow={operationLabel(type)} title={operation.reference} description={`${operation.contact} · Created ${formatDate(operation.createdAt)}`} action={<div className="flex flex-wrap items-center gap-2"><StatusBadge status={operation.status} className="min-h-10 px-3" /><Link className={secondaryButton} href={`/operations/${segments[type]}`}>Back to list</Link></div>} />
     <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-border pb-5">
+      {isOpen && ["Draft", "Waiting"].includes(operation.status) && <button className={secondaryButton} type="button" onClick={() => setEditOpen(true)}>Edit draft</button>}
       {isOpen && type !== "adjustment" && ["Draft","Waiting"].includes(operation.status) && <button className={primaryButton} type="button" onClick={() => run(() => markReady(id))}>Mark ready</button>}
       {isOpen && type === "delivery" && operation.status === "Ready" && !operation.packed && <button className={primaryButton} type="button" onClick={() => run(() => markPacked(id))}>Confirm picked & packed</button>}
       {isOpen && (operation.status === "Ready" || type === "adjustment" && operation.status === "Draft") && <button className={type === "delivery" && !operation.packed ? secondaryButton : primaryButton} type="button" onClick={() => run(() => complete(id))}>{type === "receipt" ? "Receive stock" : type === "delivery" ? "Complete delivery" : type === "transfer" ? "Complete transfer" : "Post count"}</button>}
       {isOpen && <button type="button" className={secondaryButton} onClick={() => run(() => cancel(id))}>Cancel document</button>}
       {operation.status === "Done" && <button className={secondaryButton} type="button" onClick={() => window.print()}>Print document</button>}
     </div>
+    {editOpen && <Drawer title={`Edit ${operation.reference}`} onClose={() => setEditOpen(false)}><OperationForm type={type} operation={operation} onClose={() => setEditOpen(false)} /></Drawer>}
     {feedback && <p role="status" className={`mb-6 rounded-md px-4 py-3 text-sm ${feedback.ok ? "bg-ok-wash text-ok-ink" : "bg-bad-wash text-bad-ink"}`}>{feedback.message}</p>}
     {operation.status === "Waiting" && <p className="mb-6 rounded-md bg-warn-wash px-4 py-3 text-sm text-warn-ink">Stock is not yet available at the source location. Check the line availability below, then try Mark ready again.</p>}
     <div className="grid gap-7 xl:grid-cols-[minmax(0,1.6fr)_minmax(270px,.85fr)]">

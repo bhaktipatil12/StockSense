@@ -20,6 +20,7 @@ interface DemoContextValue {
   updateLocation: (id: string, location: Omit<Location, "id">) => ActionResult;
   deleteLocation: (id: string) => ActionResult;
   createOperation: (input: NewOperation) => { result: ActionResult; id?: string };
+  updateOperation: (id: string, input: NewOperation) => ActionResult;
   markReady: (id: string) => ActionResult;
   markPacked: (id: string) => ActionResult;
   complete: (id: string) => ActionResult;
@@ -213,6 +214,29 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     return { result: done(`${operation.reference} created as a draft.`), id };
   }
 
+  function updateOperation(id: string, input: NewOperation): ActionResult {
+    const existing = state.operations.find((item) => item.id === id);
+    if (!existing) return fail("Document not found.");
+    if (!["Draft", "Waiting"].includes(existing.status)) return fail("Only draft or waiting documents can be edited.");
+    if (input.type !== existing.type) return fail("Document type cannot be changed.");
+    if (!input.lines.length || input.lines.some((line) => !state.products.some((product) => product.id === line.productId) || !Number.isFinite(line.quantity) || line.quantity < (input.type === "adjustment" ? 0 : .001))) return fail("Add products with valid quantities.");
+    if (new Set(input.lines.map((line) => line.productId)).size !== input.lines.length) return fail("Add each product once per document.");
+    if (input.type === "transfer" && input.sourceLocationId === input.destinationLocationId) return fail("Choose different source and destination locations.");
+    if ((input.type === "receipt" && !input.destinationLocationId) || (input.type !== "receipt" && !input.sourceLocationId)) return fail("Choose the required stock location.");
+    if ((input.sourceLocationId && !state.locations.some((location) => location.id === input.sourceLocationId)) || (input.destinationLocationId && !state.locations.some((location) => location.id === input.destinationLocationId))) return fail("Choose valid stock locations.");
+    if (input.type === "adjustment" && !input.reason?.trim()) return fail("Enter a reason for the physical count.");
+    if (!input.scheduledAt) return fail("Choose a scheduled date.");
+    const firstLine = input.lines[0];
+    setState((current) => ({ ...current, operations: current.operations.map((item) => item.id === id ? {
+      ...item,
+      ...input,
+      contact: input.contact.trim() || (input.type === "transfer" ? "Internal" : ""),
+      status: "Draft",
+      countBaseline: input.type === "adjustment" && input.sourceLocationId && firstLine ? onHand(current, firstLine.productId, input.sourceLocationId) : undefined,
+    } : item) }));
+    return done("Draft document updated.");
+  }
+
   function markReady(id: string): ActionResult {
     const operation = state.operations.find((item) => item.id === id);
     if (!operation) return fail("Document not found.");
@@ -277,7 +301,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     return done(`${operation.reference} canceled.`);
   }
 
-  return <DemoContext.Provider value={{ state, addProduct, updateProduct, addCategory, updateCategory, deleteCategory, updateProfile, addWarehouse, updateWarehouse, deleteWarehouse, addLocation, updateLocation, deleteLocation, createOperation, markReady, markPacked, complete, cancel }}>{children}</DemoContext.Provider>;
+  return <DemoContext.Provider value={{ state, addProduct, updateProduct, addCategory, updateCategory, deleteCategory, updateProfile, addWarehouse, updateWarehouse, deleteWarehouse, addLocation, updateLocation, deleteLocation, createOperation, updateOperation, markReady, markPacked, complete, cancel }}>{children}</DemoContext.Provider>;
 }
 
 export function useDemo(): DemoContextValue {
