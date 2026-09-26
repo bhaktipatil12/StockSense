@@ -12,13 +12,14 @@ export type { Operation, OperationLine, OperationStatus, OperationType, NewOpera
 
 export interface DemoState {
   profileName: string;
+  profileEmail: string;
   categories: Category[];
   products: Product[];
   warehouses: Warehouse[];
   locations: Location[];
   operations: Operation[];
   movements: Movement[];
+  balances: { productId: string; locationId: string; onHand: number; reserved: number }[];
 }
 
 export type ActionResult = { ok: true; message: string } | { ok: false; message: string };
-

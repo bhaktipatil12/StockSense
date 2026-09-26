@@ -1,17 +1,11 @@
 import type { DemoState, Operation, OperationType } from "../types/inventory";
 
 export function onHand(state: DemoState, productId: string, locationId: string): number {
-  return state.movements
-    .filter((movement) => movement.productId === productId && movement.locationId === locationId)
-    .reduce((total, movement) => total + movement.quantity, 0);
+  return state.balances.find((balance) => balance.productId === productId && balance.locationId === locationId)?.onHand ?? 0;
 }
 
 export function reserved(state: DemoState, productId: string, locationId: string): number {
-  return state.operations
-    .filter((operation) => operation.status === "Ready" && operation.type !== "receipt" && operation.sourceLocationId === locationId)
-    .flatMap((operation) => operation.lines)
-    .filter((line) => line.productId === productId)
-    .reduce((total, line) => total + line.quantity, 0);
+  return state.balances.find((balance) => balance.productId === productId && balance.locationId === locationId)?.reserved ?? 0;
 }
 
 export function available(state: DemoState, productId: string, locationId: string): number {
