@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import type { OperationStatus } from "../../types/inventory";
 import { Icon } from "./icon";
 
-export const primaryButton = "inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-brand-strong px-4 py-2 text-sm font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-ink-accent active:scale-[.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-strong disabled:cursor-not-allowed disabled:bg-muted disabled:text-ink-muted disabled:active:scale-100";
-export const secondaryButton = "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border-strong bg-white px-4 py-2 text-sm font-medium text-ink transition-[background-color,border-color,color,transform] duration-150 hover:border-brand-strong hover:bg-brand-soft hover:text-brand-strong active:scale-[.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-strong";
+export const primaryButton = "inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-brand-strong px-4 py-2 text-sm font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-ink-accent active:scale-[.98] disabled:cursor-not-allowed disabled:bg-muted disabled:text-ink-muted disabled:active:scale-100";
+export const secondaryButton = "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border-strong bg-white px-4 py-2 text-sm font-medium text-ink transition-[background-color,border-color,color,transform] duration-150 hover:border-brand-strong hover:bg-brand-soft hover:text-brand-strong active:scale-[.98]";
 export const inputClass = "min-h-10 w-full rounded-md border border-border-strong bg-white px-3 py-2 text-sm text-foreground outline-none placeholder:text-ink-subtle transition-colors hover:border-ink-subtle focus:border-brand-strong focus:ring-0 focus-visible:outline-none";
 export const labelClass = "grid gap-1.5 text-sm font-medium text-foreground";
 export const tableClass = "w-full min-w-[720px] border-collapse text-left text-sm";
@@ -11,7 +11,7 @@ export const thClass = "border-b border-border px-4 py-3 text-xs font-semibold t
 export const tdClass = "border-b border-border-subtle px-4 py-3.5 align-middle";
 
 export function PageHeading({ eyebrow, title, description, action }: { eyebrow: string; title: string; description: string; action?: ReactNode }) {
-  return <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="mb-1 font-mono text-[11px] font-medium uppercase tracking-[.12em] text-ink-muted">{eyebrow}</p><h1 className="m-0 font-sans text-3xl font-semibold tracking-tight text-foreground">{title}</h1><p className="mt-1.5 text-sm leading-6 text-ink-muted">{description}</p></div>{action}</header>;
+  return <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="mb-1 font-mono text-[11px] font-medium uppercase tracking-[.12em] text-ink-muted">{eyebrow}</p><h1 className="m-0 font-sans text-2xl font-semibold tracking-tight text-foreground">{title}</h1><p className="mt-1.5 text-sm leading-6 text-ink-muted">{description}</p></div>{action}</header>;
 }
 
 export function StatusBadge({ status }: { status: OperationStatus | "Low" | "Out" }) {
