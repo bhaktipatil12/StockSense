@@ -24,7 +24,7 @@ export function EmptyState({ title, description, action }: { title: string; desc
 }
 
 export function SearchField({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {
-  return <label className="relative block w-full max-w-sm flex-1"><span className="sr-only">{placeholder}</span><Icon name="search" className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-subtle" /><input className={`${inputClass} pl-9`} type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} /></label>;
+  return <label className="relative block min-w-0 w-full"><span className="sr-only">{placeholder}</span><Icon name="search" className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-subtle" /><input className={`${inputClass} pl-9`} type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} /></label>;
 }
 
 export function Drawer({ title, description, onClose, children }: { title: string; description?: string; onClose: () => void; children: ReactNode }) {
