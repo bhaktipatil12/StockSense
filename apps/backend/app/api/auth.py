@@ -8,6 +8,7 @@ from app.core.security import (
     generate_otp, hash_otp, verify_otp, get_current_user
 )
 from app.models import User, PasswordResetChallenge
+from app.core.config import settings
 from app.schemas.user import (
     UserCreate, UserUpdate, UserResponse, LoginRequest, LoginResponse,
     PasswordResetRequest, PasswordResetVerify, PasswordResetResponse
@@ -106,11 +107,10 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
     db.add(challenge)
     db.commit()
     
-    # TODO: Send OTP via email
-    # For dev mode, return OTP in response
+    # Until an email transport is configured, expose the code only in local development.
     return PasswordResetResponse(
-        message="OTP sent to email",
-        otp=otp  # Remove this in production
+        message="Use the development reset code" if settings.DEBUG else "Password reset email delivery is not configured",
+        otp=otp if settings.DEBUG else None
     )
 
 

@@ -27,7 +27,7 @@ export function AuthView({ mode }: { mode: Mode }) {
     event.preventDefault();
     setMessage("");
     if (isSignup && !/^[A-Za-z0-9_]{6,12}$/.test(login)) { setMessage("Login ID must be 6 to 12 letters, numbers, or underscores."); return; }
-    if (mode !== "login" && resetStep === "verify" || isSignup) {
+    if ((mode === "forgot-password" && resetStep === "verify") || isSignup) {
       if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{9,}$/.test(password)) { setMessage("Use at least 9 characters with uppercase, lowercase, and a symbol."); return; }
       if (password !== confirm) { setMessage("Passwords do not match."); return; }
     }
@@ -46,7 +46,7 @@ export function AuthView({ mode }: { mode: Mode }) {
         if (resetStep === "request") {
           setResetStep("verify");
           const code = payload && typeof payload === "object" && "otp" in payload && typeof payload.otp === "string" ? payload.otp : null;
-          setMessage(code ? `Development reset code: ${code}` : "Check your email for the reset code.");
+          setMessage(code ? `Development reset code: ${code}` : "Reset code delivery is not configured. Ask the administrator to configure email delivery.");
         } else { router.replace("/login?reset=done"); }
       } else { router.replace("/dashboard"); router.refresh(); }
     } catch (cause) { setMessage(cause instanceof Error ? cause.message : "Request failed."); }
@@ -60,7 +60,7 @@ export function AuthView({ mode }: { mode: Mode }) {
         <p className="mt-2 text-sm leading-6 text-ink-muted">{isLogin ? "Enter your account credentials." : isSignup ? "Create an account for your inventory workspace." : resetStep === "request" ? "Enter your account email to request a reset code." : "Enter your reset code and a new password."}</p>
         <form className="mt-6 space-y-4" onSubmit={submit}>
           {isSignup && <label className={labelClass}>Display name<input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" /></label>}
-          {mode !== "forgot-password" && <label className={labelClass}>Login ID<input className={inputClass} value={login} onChange={(event) => setLogin(event.target.value)} minLength={isSignup ? 6 : undefined} maxLength={isSignup ? 12 : undefined} required autoComplete="username" /></label>}
+          {mode !== "forgot-password" && <label className={labelClass}>{isLogin ? "Login ID or email" : "Login ID"}<input className={inputClass} value={login} onChange={(event) => setLogin(event.target.value)} minLength={isSignup ? 6 : undefined} maxLength={isSignup ? 12 : undefined} required autoComplete="username" /></label>}
           {!isLogin && <label className={labelClass}>Email<input className={inputClass} type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" /></label>}
           {mode === "forgot-password" && resetStep === "verify" && <label className={labelClass}>Reset code<input className={inputClass} inputMode="numeric" value={otp} onChange={(event) => setOtp(event.target.value)} required /></label>}
           {(mode !== "forgot-password" || resetStep === "verify") && <div className={labelClass}><label htmlFor="account-password">{isLogin ? "Password" : "New password"}</label><div className="relative"><input id="account-password" className={`${inputClass} pr-16`} type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete={isLogin ? "current-password" : "new-password"} /><button type="button" className="absolute inset-y-0 right-2 px-2 text-xs font-medium text-brand-strong hover:text-foreground" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? "Hide" : "Show"}</button></div></div>}

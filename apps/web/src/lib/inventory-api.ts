@@ -47,7 +47,7 @@ export async function loadInventory(): Promise<DemoState> {
     locations: locations.map((item) => ({ id: item.id, warehouseId: item.warehouse_id, code: item.code, name: item.name })),
     operations: operations.map((item): Operation => ({
       id: item.id, reference: item.reference, type: item.type.toLowerCase() as Operation["type"],
-      status: ({ DRAFT: "Draft", WAITING: "Waiting", READY: "Ready", DONE: "Done", CANCELED: "Canceled" } as Record<string, Operation["status"]>)[item.status] ?? "Draft",
+      status: ({ DRAFT: "Draft", WAITING: "Waiting", READY: "Ready", DONE: "Done", CANCELLED: "Canceled" } as Record<string, Operation["status"]>)[item.status] ?? "Draft",
       contact: item.supplier ?? item.customer ?? item.notes ?? "Internal", sourceLocationId: item.source_location_id ?? undefined,
       destinationLocationId: item.destination_location_id ?? undefined, scheduledAt: item.scheduled_at?.slice(0, 10) ?? item.created_at.slice(0, 10),
       createdAt: item.created_at.slice(0, 10), responsible: user.name || "Inventory user", packed: item.pick_confirmed && item.pack_confirmed,

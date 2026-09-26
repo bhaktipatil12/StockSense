@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
 from typing import Optional
 
@@ -11,7 +11,21 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=6)
+    password: str = Field(..., min_length=9)
+
+    @field_validator("login")
+    @classmethod
+    def valid_login(cls, value: str) -> str:
+        if not 6 <= len(value) <= 12 or not value.replace("_", "").isalnum():
+            raise ValueError("Login ID must be 6 to 12 letters, numbers, or underscores")
+        return value
+
+    @field_validator("password")
+    @classmethod
+    def strong_password(cls, value: str) -> str:
+        if not any(char.islower() for char in value) or not any(char.isupper() for char in value) or not any(not char.isalnum() for char in value):
+            raise ValueError("Password must include uppercase, lowercase, and a symbol")
+        return value
 
 
 class UserUpdate(BaseModel):
@@ -47,7 +61,12 @@ class PasswordResetRequest(BaseModel):
 class PasswordResetVerify(BaseModel):
     email: EmailStr
     otp: str
-    new_password: str = Field(..., min_length=6)
+    new_password: str = Field(..., min_length=9)
+
+    @field_validator("new_password")
+    @classmethod
+    def strong_password(cls, value: str) -> str:
+        return UserCreate.strong_password(value)
 
 
 class PasswordResetResponse(BaseModel):
