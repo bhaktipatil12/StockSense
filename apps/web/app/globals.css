@@ -95,6 +95,8 @@
   --color-warn-wash: var(--vt-warning-surface);
   --color-bad-ink: var(--vt-danger);
   --color-bad-wash: var(--vt-danger-surface);
+  --color-info-ink: var(--vt-info);
+  --color-info-wash: var(--vt-info-surface);
   --color-idle-ink: var(--vt-idle-ink);
   --color-idle-wash: var(--vt-idle-surface);
 }
@@ -103,5 +105,10 @@ html { font-size: 90%; }
 body { margin: 0; min-width: 320px; background: var(--background); color: var(--foreground); font-family: var(--font-sans); }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
+html, body, * { scrollbar-width: thin; scrollbar-color: rgba(120,160,200,.42) transparent; }
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(120,160,200,.42); border-radius: 9999px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(72,122,168,.7); }
 :focus-visible { outline: 2px solid var(--vt-brand-strong); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
