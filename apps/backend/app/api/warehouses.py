@@ -58,46 +58,6 @@ def list_warehouses(
     return result
 
 
-@router.get("/{warehouse_id}", response_model=WarehouseWithLocations)
-def get_warehouse(
-    warehouse_id: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get warehouse by ID"""
-    warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
-    if not warehouse:
-        raise HTTPException(status_code=404, detail="Warehouse not found")
-    
-    warehouse_dict = WarehouseResponse.model_validate(warehouse).model_dump()
-    locations = db.query(Location).filter(Location.warehouse_id == warehouse.id).all()
-    warehouse_dict["locations"] = [LocationResponse.model_validate(loc) for loc in locations]
-    
-    return WarehouseWithLocations(**warehouse_dict)
-
-
-@router.patch("/{warehouse_id}", response_model=WarehouseResponse)
-def update_warehouse(
-    warehouse_id: str,
-    warehouse_data: WarehouseUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Update warehouse"""
-    warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
-    if not warehouse:
-        raise HTTPException(status_code=404, detail="Warehouse not found")
-    
-    update_data = warehouse_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(warehouse, field, value)
-    
-    db.commit()
-    db.refresh(warehouse)
-    
-    return WarehouseResponse.model_validate(warehouse)
-
-
 # Locations
 @router.post("/locations", response_model=LocationResponse, status_code=201)
 def create_location(
@@ -184,3 +144,41 @@ def update_location(
     db.refresh(location)
     
     return LocationResponse.model_validate(location)
+
+
+# Dynamic warehouse paths follow the static /locations paths so they cannot
+# capture a location request as a warehouse ID.
+@router.get("/{warehouse_id}", response_model=WarehouseWithLocations)
+def get_warehouse(
+    warehouse_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
+    if not warehouse:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+
+    warehouse_dict = WarehouseResponse.model_validate(warehouse).model_dump()
+    locations = db.query(Location).filter(Location.warehouse_id == warehouse.id).all()
+    warehouse_dict["locations"] = [LocationResponse.model_validate(loc) for loc in locations]
+    return WarehouseWithLocations(**warehouse_dict)
+
+
+@router.patch("/{warehouse_id}", response_model=WarehouseResponse)
+def update_warehouse(
+    warehouse_id: str,
+    warehouse_data: WarehouseUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id).first()
+    if not warehouse:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+
+    update_data = warehouse_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(warehouse, field, value)
+
+    db.commit()
+    db.refresh(warehouse)
+    return WarehouseResponse.model_validate(warehouse)

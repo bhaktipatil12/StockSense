@@ -4,10 +4,10 @@ from typing import List
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "sqlite:///./stocksense.db"
+    DATABASE_URL: str
     
     # JWT
-    SECRET_KEY: str = "your-secret-key-change-this-in-production-min-32-chars-long"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
