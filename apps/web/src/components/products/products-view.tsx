@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useDemo } from "../../context/demo-context";
 import { formatQuantity, totalAvailable, totalOnHand } from "../../lib/inventory";
@@ -17,12 +17,12 @@ export function ProductsView({ initialStockFilter = "all", initialCategory }: { 
   const [stock, setStock] = useState(initialStockFilter);
   const [addOpen, setAddOpen] = useState(false);
   const categories = state.categories.map((item) => item.name);
-  const products = useMemo(() => state.products.filter((product) => {
+  const products = state.products.filter((product) => {
     const matchesSearch = `${product.name} ${product.sku}`.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category === "all" || product.category === category;
     const matchesStock = stock === "all" || totalOnHand(state,product.id) <= product.reorderPoint;
     return matchesSearch && matchesCategory && matchesStock;
-  }), [state, search, category, stock]);
+  });
   return <>
     <PageHeading eyebrow="Catalog" title="Products & stock" description="Search the catalog and inspect current availability by location." action={<div className="flex flex-wrap gap-2"><button className={secondaryButton} type="button" onClick={() => downloadCsv("stocksense-products.csv", ["SKU", "Product", "Category", "Unit", "Unit cost", "On hand", "Reserved", "Free to use", "Reorder point"], products.map((product) => { const onHand = totalOnHand(state, product.id); const free = totalAvailable(state, product.id); return [product.sku, product.name, product.category, product.unit, product.unitCost ?? "", onHand, onHand - free, free, product.reorderPoint]; }))}><Icon name="download" className="h-4 w-4" />Export for Excel</button><button className={primaryButton} type="button" onClick={() => setAddOpen(true)}><Icon name="plus" className="h-4 w-4" />Add product</button></div>} />
     <div className="mb-7 grid grid-cols-2 items-center gap-3 lg:grid-cols-[minmax(280px,1fr)_220px_170px]"><div className="col-span-2 lg:col-span-1"><SearchField value={search} onChange={setSearch} placeholder="Search name or SKU" /></div><SelectField label="Filter by category" value={category} onChange={setCategory} options={[{ value: "all", label: "All categories" }, ...categories.map((item) => ({ value: item, label: item }))]} /><SelectField label="Filter by stock" value={stock} onChange={(value) => setStock(value as "all" | "low")} options={[{ value: "all", label: "All stock" }, { value: "low", label: "Low / out" }]} /></div>
