@@ -14,7 +14,11 @@ interface DemoContextValue {
   deleteCategory: (id: string) => ActionResult;
   updateProfile: (name: string) => ActionResult;
   addWarehouse: (warehouse: Omit<Warehouse, "id">) => ActionResult;
+  updateWarehouse: (id: string, warehouse: Omit<Warehouse, "id">) => ActionResult;
+  deleteWarehouse: (id: string) => ActionResult;
   addLocation: (location: Omit<Location, "id">) => ActionResult;
+  updateLocation: (id: string, location: Omit<Location, "id">) => ActionResult;
+  deleteLocation: (id: string) => ActionResult;
   createOperation: (input: NewOperation) => { result: ActionResult; id?: string };
   markReady: (id: string) => ActionResult;
   markPacked: (id: string) => ActionResult;
@@ -150,6 +154,36 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     return done("Location added.");
   }
 
+  function updateWarehouse(id: string, warehouse: Omit<Warehouse, "id">): ActionResult {
+    if (!state.warehouses.some((item) => item.id === id)) return fail("Warehouse not found.");
+    if (!warehouse.code.trim() || !warehouse.name.trim()) return fail("Enter a warehouse code and name.");
+    if (state.warehouses.some((item) => item.id !== id && item.code.toLowerCase() === warehouse.code.trim().toLowerCase())) return fail("This warehouse code is already in use.");
+    setState((current) => ({ ...current, warehouses: current.warehouses.map((item) => item.id === id ? { ...warehouse, id, code: warehouse.code.trim().toUpperCase(), name: warehouse.name.trim() } : item) }));
+    return done("Warehouse updated.");
+  }
+
+  function deleteWarehouse(id: string): ActionResult {
+    if (!state.warehouses.some((item) => item.id === id)) return fail("Warehouse not found.");
+    if (state.locations.some((item) => item.warehouseId === id)) return fail("Remove this warehouse's locations first.");
+    setState((current) => ({ ...current, warehouses: current.warehouses.filter((item) => item.id !== id) }));
+    return done("Warehouse removed.");
+  }
+
+  function updateLocation(id: string, location: Omit<Location, "id">): ActionResult {
+    if (!state.locations.some((item) => item.id === id)) return fail("Location not found.");
+    if (!location.name.trim() || !location.code.trim() || !state.warehouses.some((item) => item.id === location.warehouseId)) return fail("Enter a location name, code, and warehouse.");
+    if (state.locations.some((item) => item.id !== id && item.warehouseId === location.warehouseId && item.code.toLowerCase() === location.code.trim().toLowerCase())) return fail("This code already exists in the warehouse.");
+    setState((current) => ({ ...current, locations: current.locations.map((item) => item.id === id ? { ...location, id, code: location.code.trim().toUpperCase(), name: location.name.trim() } : item) }));
+    return done("Location updated.");
+  }
+
+  function deleteLocation(id: string): ActionResult {
+    if (!state.locations.some((item) => item.id === id)) return fail("Location not found.");
+    if (state.movements.some((item) => item.locationId === id) || state.operations.some((item) => item.sourceLocationId === id || item.destinationLocationId === id)) return fail("This location is used in stock history or documents.");
+    setState((current) => ({ ...current, locations: current.locations.filter((item) => item.id !== id) }));
+    return done("Location removed.");
+  }
+
   function createOperation(input: NewOperation): { result: ActionResult; id?: string } {
     const firstLine = input.lines[0];
     if (!firstLine || input.lines.some((line) => !state.products.some((product) => product.id === line.productId) || !Number.isFinite(line.quantity) || line.quantity < 0)) return { result: fail("Add a product and a valid quantity.") };
@@ -243,7 +277,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     return done(`${operation.reference} canceled.`);
   }
 
-  return <DemoContext.Provider value={{ state, addProduct, updateProduct, addCategory, updateCategory, deleteCategory, updateProfile, addWarehouse, addLocation, createOperation, markReady, markPacked, complete, cancel }}>{children}</DemoContext.Provider>;
+  return <DemoContext.Provider value={{ state, addProduct, updateProduct, addCategory, updateCategory, deleteCategory, updateProfile, addWarehouse, updateWarehouse, deleteWarehouse, addLocation, updateLocation, deleteLocation, createOperation, markReady, markPacked, complete, cancel }}>{children}</DemoContext.Provider>;
 }
 
 export function useDemo(): DemoContextValue {
