@@ -28,20 +28,20 @@ export function SettingsView({ section }: { section: "warehouses" | "locations" 
     setMessage("");
     setOpen(true);
   }
-  function remove(id: string) {
+  async function remove(id: string) {
     if (confirmId !== id) { setConfirmId(id); return; }
-    const result = isWarehouses ? deleteWarehouse(id) : deleteLocation(id);
+    const result = await (isWarehouses ? deleteWarehouse(id) : deleteLocation(id));
     setMessage(result.message);
     setConfirmId(null);
   }
   function recordActions(record: Warehouse | Location) {
     return <div className="flex items-center gap-2"><button type="button" className="rounded-md px-2 py-1 text-xs font-medium text-brand-strong hover:bg-brand-soft" onClick={() => start(record)}>Edit</button><button type="button" className="rounded-md px-2 py-1 text-xs font-medium text-bad-ink hover:bg-bad-wash" onClick={() => remove(record.id)}>{confirmId === record.id ? "Confirm delete" : "Delete"}</button>{confirmId === record.id && <button type="button" className="text-xs text-ink-muted hover:underline" onClick={() => setConfirmId(null)}>Keep</button>}</div>;
   }
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = isWarehouses
+    const result = await (isWarehouses
       ? editing ? updateWarehouse(editing.id, { code, name, address }) : addWarehouse({ code, name, address })
-      : editing ? updateLocation(editing.id, { code, name, warehouseId }) : addLocation({ code, name, warehouseId });
+      : editing ? updateLocation(editing.id, { code, name, warehouseId }) : addLocation({ code, name, warehouseId }));
     if (result.ok) { setOpen(false); setEditing(null); setMessage(result.message); } else setMessage(result.message);
   }
   return <>

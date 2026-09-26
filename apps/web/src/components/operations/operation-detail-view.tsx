@@ -16,7 +16,7 @@ export function OperationDetailView({ type, id }: { type: OperationType; id: str
   const [editOpen, setEditOpen] = useState(false);
   const operation = state.operations.find((item) => item.id === id && item.type === type);
   if (!operation) return <EmptyState title="Document not found" description="This operation could not be found." action={<Link className={secondaryButton} href={`/operations/${segments[type]}`}>Back to {segments[type]}</Link>} />;
-  function run(action: () => ActionResult) { setFeedback(action()); }
+  async function run(action: () => Promise<ActionResult>) { setFeedback(await action()); }
   const source = locationName(state,operation.sourceLocationId);
   const destination = locationName(state,operation.destinationLocationId);
   const isOpen = !["Done","Canceled"].includes(operation.status);
@@ -25,9 +25,9 @@ export function OperationDetailView({ type, id }: { type: OperationType; id: str
     <PageHeading eyebrow={operationLabel(type)} title={operation.reference} description={`${operation.contact} · Created ${formatDate(operation.createdAt)}`} action={<div className="flex flex-wrap items-center gap-2"><StatusBadge status={operation.status} className="min-h-10 px-3" /><Link className={secondaryButton} href={`/operations/${segments[type]}`}>Back to list</Link></div>} />
     <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-border pb-5">
       {isOpen && ["Draft", "Waiting"].includes(operation.status) && <button className={secondaryButton} type="button" onClick={() => setEditOpen(true)}>Edit draft</button>}
-      {isOpen && type !== "adjustment" && ["Draft","Waiting"].includes(operation.status) && <button className={primaryButton} type="button" onClick={() => run(() => markReady(id))}>Mark ready</button>}
+      {isOpen && ["Draft","Waiting"].includes(operation.status) && <button className={primaryButton} type="button" onClick={() => run(() => markReady(id))}>Mark ready</button>}
       {isOpen && type === "delivery" && operation.status === "Ready" && !operation.packed && <button className={primaryButton} type="button" onClick={() => run(() => markPacked(id))}>Confirm picked & packed</button>}
-      {isOpen && (operation.status === "Ready" || type === "adjustment" && operation.status === "Draft") && <button className={type === "delivery" && !operation.packed ? secondaryButton : primaryButton} type="button" onClick={() => run(() => complete(id))}>{type === "receipt" ? "Receive stock" : type === "delivery" ? "Complete delivery" : type === "transfer" ? "Complete transfer" : "Post count"}</button>}
+      {isOpen && operation.status === "Ready" && <button className={type === "delivery" && !operation.packed ? secondaryButton : primaryButton} type="button" onClick={() => run(() => complete(id))}>{type === "receipt" ? "Receive stock" : type === "delivery" ? "Complete delivery" : type === "transfer" ? "Complete transfer" : "Post count"}</button>}
       {isOpen && <button type="button" className={secondaryButton} onClick={() => run(() => cancel(id))}>Cancel document</button>}
       {operation.status === "Done" && <button className={secondaryButton} type="button" onClick={() => window.print()}>Print document</button>}
     </div>

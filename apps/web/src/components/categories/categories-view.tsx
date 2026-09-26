@@ -26,16 +26,16 @@ export function CategoriesView() {
     setOpen(true);
   }
 
-  function save(event: FormEvent<HTMLFormElement>) {
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = editing ? updateCategory(editing.id, name, parentId || undefined) : addCategory(name, parentId || undefined);
+    const result = await (editing ? updateCategory(editing.id, name, parentId || undefined) : addCategory(name, parentId || undefined));
     if (result.ok) { setOpen(false); setMessage(result.message); }
     else setMessage(result.message);
   }
 
-  function remove(category: Category) {
+  async function remove(category: Category) {
     if (confirmId !== category.id) { setConfirmId(category.id); return; }
-    const result = deleteCategory(category.id);
+    const result = await deleteCategory(category.id);
     setMessage(result.message);
     if (result.ok) setConfirmId(null);
   }

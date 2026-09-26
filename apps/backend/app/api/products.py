@@ -45,6 +45,32 @@ def list_categories(
     return [CategoryResponse.model_validate(c) for c in categories]
 
 
+@router.patch("/categories/{category_id}", response_model=CategoryResponse)
+def update_category(category_id: str, data: CategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    name = data.name.strip()
+    if not name or db.query(Category).filter(Category.name == name, Category.id != category_id).first():
+        raise HTTPException(status_code=400, detail="Category name is empty or already in use")
+    category.name = name
+    db.commit()
+    db.refresh(category)
+    return CategoryResponse.model_validate(category)
+
+
+@router.delete("/categories/{category_id}")
+def delete_category(category_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    if category.products:
+        raise HTTPException(status_code=400, detail="Move products out of this category before deleting it")
+    db.delete(category)
+    db.commit()
+    return {"message": "Category deleted"}
+
+
 # Products
 @router.post("", response_model=ProductResponse, status_code=201)
 def create_product(

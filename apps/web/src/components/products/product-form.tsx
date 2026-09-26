@@ -17,10 +17,10 @@ export function ProductForm({ onClose, product }: { onClose: () => void; product
   const [opening, setOpening] = useState("0");
   const [locationId, setLocationId] = useState(state.locations[0]?.id ?? "");
   const [message, setMessage] = useState("");
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const details = { name, sku, category, unit, reorderPoint: Number(reorderPoint), unitCost: unitCost ? Number(unitCost) : undefined };
-    const result = product ? updateProduct(product.id, details) : addProduct(details, { locationId, quantity: Number(opening) });
+    const result = await (product ? updateProduct(product.id, details) : addProduct(details, { locationId, quantity: Number(opening) }));
     if (result.ok) onClose(); else setMessage(result.message);
   }
   return <form className="space-y-5" onSubmit={submit}>

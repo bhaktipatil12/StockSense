@@ -4,7 +4,7 @@ import { backendRequest, sessionCookie } from "../../../../src/lib/server-api";
 const allowed = new Set(["auth", "products", "warehouses", "operations", "stock", "movements", "dashboard"]);
 
 async function proxy(request: NextRequest, path: string[]): Promise<NextResponse> {
-  if (!path.length || !allowed.has(path[0]) || path.some((part) => !/^[a-zA-Z0-9_-]+$/.test(part))) {
+  if (!path.length || !allowed.has(path[0] ?? "") || path.some((part) => !/^[a-zA-Z0-9_-]+$/.test(part))) {
     return NextResponse.json({ detail: "Invalid API path" }, { status: 404 });
   }
   if (path[0] === "auth" && path[1] !== "me" && path[1] !== "password-reset") {

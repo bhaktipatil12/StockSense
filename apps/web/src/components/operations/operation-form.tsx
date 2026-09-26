@@ -23,10 +23,10 @@ export function OperationForm({ type, onClose, initialProductId, operation }: { 
   function updateLine(index: number, value: Partial<OperationLine>) {
     setLines((current) => current.map((line, position) => position === index ? { ...line, ...value } : line));
   }
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const input = { type, contact, sourceLocationId: type === "receipt" ? undefined : sourceLocationId, destinationLocationId: type === "receipt" || type === "transfer" ? destinationLocationId : undefined, scheduledAt, lines, reason };
-    const { result, id } = operation ? { result: updateOperation(operation.id, input), id: operation.id } : createOperation(input);
+    const { result, id } = operation ? { result: await updateOperation(operation.id, input), id: operation.id } : await createOperation(input);
     if (result.ok && id) {
       onClose();
       if (!operation) router.push(operationPath({ id, type }));

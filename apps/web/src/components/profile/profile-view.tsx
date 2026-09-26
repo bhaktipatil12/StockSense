@@ -10,9 +10,9 @@ export function ProfileView() {
   const [nameDraft, setNameDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const name = nameDraft ?? state.profileName;
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = updateProfile(name);
+    const result = await updateProfile(name);
     setMessage(result.message);
     if (result.ok) setNameDraft(null);
   }

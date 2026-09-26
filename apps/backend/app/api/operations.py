@@ -189,6 +189,20 @@ def mark_ready(
     return mark_operation_ready(db, operation_id, current_user.id)
 
 
+@router.post("/{operation_id}/packing", response_model=OperationResponse)
+def confirm_packing(operation_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    operation = db.query(Operation).filter(Operation.id == operation_id).first()
+    if not operation:
+        raise HTTPException(status_code=404, detail="Operation not found")
+    if operation.type != "DELIVERY" or operation.status != "READY":
+        raise HTTPException(status_code=400, detail="Only a ready delivery can be packed")
+    operation.pick_confirmed = True
+    operation.pack_confirmed = True
+    db.commit()
+    db.refresh(operation)
+    return OperationResponse.model_validate(operation)
+
+
 @router.post("/{operation_id}/complete", response_model=CompleteOperationResponse)
 def complete(
     operation_id: str,

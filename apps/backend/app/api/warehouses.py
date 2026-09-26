@@ -146,6 +146,18 @@ def update_location(
     return LocationResponse.model_validate(location)
 
 
+@router.delete("/locations/{location_id}")
+def delete_location(location_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    location = db.query(Location).filter(Location.id == location_id, Location.active == True).first()
+    if not location:
+        raise HTTPException(status_code=404, detail="Location not found")
+    if location.stock_balances or location.movements or location.source_operations or location.destination_operations:
+        raise HTTPException(status_code=400, detail="Location has stock or document history")
+    location.active = False
+    db.commit()
+    return {"message": "Location removed"}
+
+
 # Dynamic warehouse paths follow the static /locations paths so they cannot
 # capture a location request as a warehouse ID.
 @router.get("/{warehouse_id}", response_model=WarehouseWithLocations)
@@ -182,3 +194,17 @@ def update_warehouse(
     db.commit()
     db.refresh(warehouse)
     return WarehouseResponse.model_validate(warehouse)
+
+
+@router.delete("/{warehouse_id}")
+def delete_warehouse(warehouse_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    warehouse = db.query(Warehouse).filter(Warehouse.id == warehouse_id, Warehouse.active == True).first()
+    if not warehouse:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+    if any(location.stock_balances or location.movements or location.source_operations or location.destination_operations for location in warehouse.locations):
+        raise HTTPException(status_code=400, detail="Warehouse has stock or document history")
+    for location in warehouse.locations:
+        location.active = False
+    warehouse.active = False
+    db.commit()
+    return {"message": "Warehouse removed"}

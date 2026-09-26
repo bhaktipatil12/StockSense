@@ -9,7 +9,7 @@ from app.core.security import (
 )
 from app.models import User, PasswordResetChallenge
 from app.schemas.user import (
-    UserCreate, UserResponse, LoginRequest, LoginResponse,
+    UserCreate, UserUpdate, UserResponse, LoginRequest, LoginResponse,
     PasswordResetRequest, PasswordResetVerify, PasswordResetResponse
 )
 import uuid
@@ -57,7 +57,7 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=LoginResponse)
 def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     """Authenticate user and return token"""
-    user = db.query(User).filter(User.login == credentials.login).first()
+    user = db.query(User).filter((User.login == credentials.login) | (User.email == credentials.login)).first()
     
     if not user or not verify_password(credentials.password, user.password_hash):
         raise HTTPException(
@@ -173,6 +173,16 @@ def verify_password_reset(request: PasswordResetVerify, db: Session = Depends(ge
 @router.get("/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Get current user information"""
+    return UserResponse.model_validate(current_user)
+
+
+@router.patch("/me", response_model=UserResponse)
+def update_current_user(data: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if data.name is None or not data.name.strip():
+        raise HTTPException(status_code=400, detail="Display name is required")
+    current_user.name = data.name.strip()
+    db.commit()
+    db.refresh(current_user)
     return UserResponse.model_validate(current_user)
 
 

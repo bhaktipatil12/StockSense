@@ -146,8 +146,8 @@ def mark_operation_ready(db: Session, operation_id: str, actor_id: str) -> MarkR
     
     lines = db.query(OperationLine).filter(OperationLine.operation_id == operation_id).all()
     
-    # Receipts don't need reservation
-    if operation.type == "RECEIPT":
+    # Receipts and physical counts do not reserve outgoing stock.
+    if operation.type in ["RECEIPT", "ADJUSTMENT"]:
         operation.status = "READY"
         operation.updated_at = datetime.utcnow()
         db.commit()
@@ -234,6 +234,9 @@ def complete_operation(db: Session, operation_id: str, actor_id: str) -> Complet
     
     if operation.status != "READY":
         raise HTTPException(status_code=400, detail=f"Cannot complete from status {operation.status}")
+
+    if operation.type == "DELIVERY" and not (operation.pick_confirmed and operation.pack_confirmed):
+        raise HTTPException(status_code=400, detail="Confirm picking and packing before completing delivery")
     
     lines = db.query(OperationLine).filter(OperationLine.operation_id == operation_id).all()
     sorted_lines = sorted(lines, key=lambda x: x.product_id)
