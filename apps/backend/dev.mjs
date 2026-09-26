@@ -18,7 +18,7 @@ const fileEnv = Object.fromEntries(readFileSync(envFile, "utf8").split(/\r?\n/).
 }));
 
 function run(command, args) {
-  const result = spawnSync(command, args, { cwd: root, stdio: "inherit" });
+  const result = spawnSync(command, args, { cwd: root, stdio: "inherit", env: { ...process.env, ...fileEnv } });
   if (result.error) {
     console.error(result.error.message);
     process.exit(1);
@@ -36,6 +36,8 @@ if (dependencyCheck.status !== 0) {
   console.log("Installing backend dependencies...");
   run(python, ["-m", "pip", "install", "-r", "requirements.txt"]);
 }
+
+run(python, ["-m", "alembic", "upgrade", "head"]);
 
 const server = spawn(python, ["-m", "uvicorn", "app.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"], {
   cwd: root,

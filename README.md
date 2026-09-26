@@ -1,4 +1,10 @@
-# Turborepo Tailwind CSS starter
+# StockSense
+
+For PostgreSQL setup, migrations, and the root `pnpm dev` command, see [Local development](docs/LOCAL_DEVELOPMENT.md).
+
+The web app is at `http://localhost:3001`; the FastAPI backend is at `http://127.0.0.1:8000`.
+
+## Template notes
 
 This Turborepo starter is maintained by the Turborepo core team.
 

@@ -1,10 +1,18 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import List
 
 
 class Settings(BaseSettings):
     # Database
     DATABASE_URL: str
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def require_postgresql(cls, value: str) -> str:
+        if not value.startswith(("postgresql://", "postgresql+psycopg2://")):
+            raise ValueError("DATABASE_URL must be a PostgreSQL URL")
+        return value
     
     # JWT
     SECRET_KEY: str

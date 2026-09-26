@@ -2,6 +2,12 @@ import type { DemoState } from "../types/inventory";
 
 export const initialDemoState: DemoState = {
   profileName: "Tanveer Singh",
+  categories: [
+    { id: "cat-furniture", name: "Furniture" },
+    { id: "cat-raw", name: "Raw materials" },
+    { id: "cat-components", name: "Components" },
+    { id: "cat-finished", name: "Finished goods" },
+  ],
   warehouses: [
     { id: "wh-main", code: "WH", name: "Main warehouse", address: "Hyderabad, Telangana" },
     { id: "wh-north", code: "NW", name: "North distribution", address: "Secunderabad, Telangana" },

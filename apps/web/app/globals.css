@@ -110,5 +110,7 @@ html, body, * { scrollbar-width: thin; scrollbar-color: rgba(120,160,200,.42) tr
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: rgba(120,160,200,.42); border-radius: 9999px; }
 *::-webkit-scrollbar-thumb:hover { background: rgba(72,122,168,.7); }
-:focus-visible { outline: 2px solid var(--vt-brand-strong); outline-offset: 3px; }
+:focus-visible { outline: none; }
+button:focus-visible { filter: brightness(.94); }
+a:focus-visible { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }

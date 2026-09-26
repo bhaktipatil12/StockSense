@@ -116,7 +116,7 @@ backend/
    # Edit .env with your settings
    ```
 
-6. **Run migrations** (optional - tables are auto-created):
+6. **Run migrations** (required before starting the API):
    ```bash
    alembic upgrade head
    ```

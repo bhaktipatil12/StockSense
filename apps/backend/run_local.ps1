@@ -25,9 +25,13 @@ Write-Host "🔌 Activating virtual environment..." -ForegroundColor Cyan
 Write-Host "📥 Installing dependencies..." -ForegroundColor Cyan
 pip install -r requirements.txt
 
-# Check if PostgreSQL is accessible
-Write-Host "🔍 Checking PostgreSQL connection..." -ForegroundColor Cyan
-$env:DATABASE_URL = "postgresql://stocksense:stocksense123@localhost:5432/stocksense_db"
+# Apply the same migrations and .env configuration used by the root dev task.
+if (-not (Test-Path -LiteralPath ".env")) {
+    Write-Error "Missing apps/backend/.env. Copy .env.example and set PostgreSQL credentials."
+    exit 1
+}
+& .\venv\Scripts\python.exe -m alembic upgrade head
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Start FastAPI
 Write-Host "🚀 Starting FastAPI server..." -ForegroundColor Green
