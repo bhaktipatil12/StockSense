@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from typing import List
 
 
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     
     # App
     APP_NAME: str = "StockSense API"
-    DEBUG: bool = True
+    DEBUG: bool = Field(default=False, validation_alias="STOCKSENSE_DEBUG")
     
     class Config:
         env_file = ".env"
