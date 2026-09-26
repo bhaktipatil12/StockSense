@@ -1,4 +1,8 @@
-# StockSense
+<div align="center"> 
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0EA5E9,100:6366F1&height=180&section=header&text=StockSense&fontSize=56&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Turborepo%20%2B%20Next.js%20%2B%20FastAPI&descAlignY=58&descSize=18" width="100%"/> 
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&pause=1000&color=0EA5E9&center=true&vCenter=true&width=600&lines=Next.js+web+app;FastAPI+backend;TypeScript+%C2%B7+Tailwind+CSS+%C2%B7+Turborepo" alt="Typing SVG" />
+</div>
+<br>
 
 For PostgreSQL setup, migrations, and the root `pnpm dev` command, see [Local development](docs/LOCAL_DEVELOPMENT.md).
 
